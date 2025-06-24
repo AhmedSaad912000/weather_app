@@ -74,7 +74,6 @@ Future<Position> permission()async{
               return const AppImage('weather_not_found.jpg');
             } else if (state is WeatherSuccessState) {
               final animationPath = getWeatherAnimation(state.model!.mainCondition);
-              print(animationPath);
               return Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
