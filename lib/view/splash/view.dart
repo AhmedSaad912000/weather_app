@@ -24,7 +24,7 @@ class _SplashViewState extends State<SplashView> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: AppImage(
-        'splash_weather.webp',
+        'city_weather.jpg',
         height: double.infinity,
         fit: BoxFit.fill,
       ),

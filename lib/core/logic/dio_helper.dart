@@ -3,6 +3,8 @@ class WeatherServices {
   static final _dio = Dio(
       BaseOptions(
           baseUrl: 'https://api.openweathermap.org/data/2.5',
+        receiveDataWhenStatusError: true,
+
       )
   );
 static  Future<CustomResponse> get({Map<String, dynamic>?data}) async {

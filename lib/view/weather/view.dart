@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:kiwi/kiwi.dart';
 import 'package:lottie/lottie.dart';
 import 'package:weather_app/core/design/app_image.dart';
+import '../../core/logic/countries.dart';
 import '../../features/weather/bloc.dart';
 
 class WeatherView extends StatefulWidget {
@@ -41,7 +42,7 @@ class _WeatherViewState extends State<WeatherView> {
   @override
   void initState() {
     super.initState();
-    bloc.add(GetWeatherEvent(countryName: widget.countryName!));
+    bloc.add(GetWeatherEvent(cityName: widget.countryName!));
   }
 
   @override
@@ -87,7 +88,7 @@ class _WeatherViewState extends State<WeatherView> {
                     Lottie.asset(animationPath, height: 200.h, width: 200.w),
                     Spacer(),
                     Text(
-                      "${state.model!.temperature.toStringAsFixed(1)}°C",
+                      "${state.model!.temperature.round()}°C",
                       style: TextStyle(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w900,
