@@ -1,9 +1,9 @@
 part of 'bloc.dart';
 class WeatherEvents{}
 class GetWeatherEvent extends WeatherEvents{
-  final String lat,lon;
+  final String countryName;
 
-  GetWeatherEvent({ required this.lat,required this.lon});
+  GetWeatherEvent({required this.countryName});
 }
 
 

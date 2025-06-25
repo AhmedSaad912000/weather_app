@@ -8,23 +8,25 @@ class WeatherBloc extends Bloc<WeatherEvents,WeatherStates>{
   WeatherBloc():super(WeatherStates()){
     on<GetWeatherEvent>(getWeather);
   }
-  Future<void> getWeather(GetWeatherEvent event, Emitter<WeatherStates> emit)async {
-    emit (WeatherLoadingState());
-    final responseWeather=await WeatherServices.get(data: {
-      "lat":event.lat,
-      "lon":event.lon,
+  Future<void> getWeather(GetWeatherEvent event, Emitter<WeatherStates> emit) async {
+    emit(WeatherLoadingState());
+
+    print(" جاري جلب بيانات الطقس للمدينة: ${event.countryName}");
+
+    final responseWeather = await WeatherServices.get(data: {
+      "q": event.countryName,
     });
-    if(responseWeather.isSuccess){
-      final model= Weather.fromJson(responseWeather.data);
-       emit(WeatherSuccessState(model:model));
-    }else{
+
+    if (responseWeather.isSuccess) {
+      print(" ${responseWeather.data}البيانات المستلمة:");
+      final model = Weather.fromJson(responseWeather.data);
+      emit(WeatherSuccessState(model: model));
+    } else {
       emit(WeatherFailedState());
     }
-
-
   }
 
 
 
-  }
+}
 

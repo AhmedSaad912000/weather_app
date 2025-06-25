@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:kiwi/kiwi.dart';
 import 'package:lottie/lottie.dart';
@@ -8,43 +9,24 @@ import 'package:weather_app/core/design/app_image.dart';
 import '../../features/weather/bloc.dart';
 
 class WeatherView extends StatefulWidget {
-  const WeatherView({super.key});
+
+  final String? countryName;
+  final String? cityName;
+
+
+  const WeatherView({super.key, required this.countryName, required this.cityName});
 
   @override
   State<WeatherView> createState() => _WeatherViewState();
 }
 
-
 class _WeatherViewState extends State<WeatherView> {
-   final bloc = KiwiContainer().resolve<WeatherBloc>();
-  Future<Position> getPermissionCity() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
+  final bloc = KiwiContainer().resolve<WeatherBloc>();
+  String getWeatherAnimation(String? mainCondition) {
+    if (mainCondition == null) {
+      return 'assets/lotties/sunny.json';
     }
-    final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high
-    );
-    return position;
-  }
-Future<Position> permission()async{
-  final   location = await getPermissionCity();
-  return location;
-}
-  Future<void> fetchPermissionAndLoadWeather() async {
-    final getPermission = await permission();
-    bloc.add(
-      GetWeatherEvent(
-        lat: getPermission.latitude.toString(),
-        lon: getPermission.longitude.toString(),
-      ),
-    );
-  }
-   String getWeatherAnimation(String? mainCondition){
-    if(mainCondition==null) {
-      return'assets/lotties/sunny.json';
-    }
-    switch(mainCondition.toLowerCase()){
+    switch (mainCondition.toLowerCase()) {
       case 'clouds':
         return 'assets/lotties/snow.json';
       case 'shower rain':
@@ -54,33 +36,47 @@ Future<Position> permission()async{
       default:
         return 'assets/lotties/sunny.json';
     }
-   }
+  }
 
-
-     @override
+  @override
   void initState() {
     super.initState();
-    fetchPermissionAndLoadWeather();
+    bloc.add(GetWeatherEvent(countryName: widget.countryName!));
   }
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Colors.grey,
       body: BlocBuilder(
           bloc: bloc,
           builder: (context, state) {
             if (state is WeatherFailedState) {
-              return const AppImage('weather_not_found.jpg');
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const AppImage('weather_not_found.jpg'),
+                    const SizedBox(height: 16),
+                    Text(
+                      'تعذر جلب بيانات الطقس، يرجى المحاولة مرة أخرى',
+                      style: TextStyle(fontSize: 16.sp, color: Colors.white),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
+
             } else if (state is WeatherSuccessState) {
-              final animationPath = getWeatherAnimation(state.model!.mainCondition);
+              final animationPath =
+              getWeatherAnimation(state.model!.mainCondition);
               return Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Spacer(),
                     Text(
-                      state.model!.cityName,
+                      state.model!.countryCode,
                       style: TextStyle(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w900,
@@ -88,10 +84,10 @@ Future<Position> permission()async{
                       ),
                     ),
                     Spacer(),
-                    Lottie.asset(animationPath,height: 200.h,width: 200.w),
+                    Lottie.asset(animationPath, height: 200.h, width: 200.w),
                     Spacer(),
                     Text(
-                      "${(state.model!.temperature - 273.15).round()}°C",
+                      "${state.model!.temperature.toStringAsFixed(1)}°C",
                       style: TextStyle(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w900,
@@ -103,9 +99,14 @@ Future<Position> permission()async{
                 ),
               );
             } else {
-              return Center(child: CircularProgressIndicator(color: Colors.black),);
+              return Center(
+                child: CircularProgressIndicator(color: Colors.black),
+              );
             }
           }),
     );
   }
-}
+  }
+
+
+
